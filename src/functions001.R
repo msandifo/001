@@ -319,7 +319,7 @@ p1 +geom_line(data=NEM.month %>% subset(date< max( gas$date)+months(1)), aes(y=R
 #drake plan
 #------
  twitter001 = drake::drake_plan(
-   lng = update_gladstone(),
+   lng = update_gladstone( local.path=local.path),
    NSW1 =get_aemo_data(state='NSW'),# %>% padr::pad()
    VIC1 =get_aemo_data(state='VIC'),
    SA1 = get_aemo_data(state='SA'),

@@ -1,7 +1,7 @@
 
 library(drake)
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
-
+local.path=NULL
 drake.path <-
   dirname(rstudioapi::getSourceEditorContext()$path )
 setwd(drake.path)
@@ -11,11 +11,12 @@ source('themes001.R')
 source('functions001.R')
 setwd(drake.path)
 
-download_aemo_aggregated(year=2010:2018, months=1:12)
-download_aemo_current()
+download_aemo_aggregated(year=2010:2018, months=1:12, local.path=local.path)
+download_aemo_current( local.path=local.path )
 
 
-make(twitter001)
+make
+
 setwd("./figs")
 ggsave("ms001.png",  readd(repo001.plot) ,width=8, height=5) 
 ggsave("ms002.png",  readd(repo002.plot) ,width=8, height=5) 
