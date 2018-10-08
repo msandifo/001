@@ -20,6 +20,7 @@ make( twitter001)
 setwd("./figs")
 ggsave("ms001.png",  readd(repo001.plot) ,width=8, height=5) 
 ggsave("ms002.png",  readd(repo002.plot) ,width=8, height=5) 
+ggsave("ms003.png",  readd(repo003.plot) ,width=8, height=5) 
 setwd(drake.path)
   
   

@@ -169,7 +169,6 @@ read_gladstone_ports<- function(year=NULL,
                       mdays=mdays))
 }
 
- 
  # requires purrr
  #reads a sequence of gladstone port authority tables
  read_gladstone_year <- function(years=2015:lubridate::year(Sys.Date()),fuel="Liquefied Natural Gas", country="Total"){
@@ -184,7 +183,7 @@ read_gladstone_ports<- function(year=NULL,
    local.path=validate_directory(local.path, folder="gladstone")
    gladstone.file = paste0(local.path, "/", "lng.Rdata")
    if (!file.exists(gladstone.file)) {
-     read_gladstone_year(years=2015:2018 ) -> lng
+     read_gladstone_year(years=years ) -> lng
     save(lng, file=gladstone.file )} else load(gladstone.file)
    lng
  }
@@ -277,7 +276,7 @@ ggplot(lng  , aes(date, tonnes/1e6/mdays*365))+ geom_line(data=NEM.month , aes(y
   geom_point(size=1.25, colour="white")+
   geom_point(size=.75)+
   labs(subtitle="Gladstone LNG exports, NEM prices", x=NULL, 
-       y="million tonnes - annualised", caption= "Mike Sandiford, msandifo@gmail.com\n repo: https://github.com/msandifo/twitter/blob/master/drake001.R")+
+       y="million tonnes - annualised", caption= "Mike Sandiford, msandifo@gmail.com\n repo: https://github.com/msandifo/001")+
   theme(plot.caption=element_text(colour="grey80", size=8,hjust=1) )
 
 }
@@ -311,10 +310,39 @@ p1 +geom_line(data=NEM.month %>% subset(date< max( gas$date)+months(1)), aes(y=R
         axis.title.y.left= element_text(  color = "red3"),
         axis.title.y.right= element_text(angle = -90, hjust = 0, color = "black"))+
   labs(subtitle="NEM gas generation, prices", x=NULL, 
-       y="gigawatts", caption= "Mike Sandiford, msandifo@gmail.com\n repo: https://github.com/msandifo/twitter/blob/master/001/drake001.R")+
+       y="gigawatts", caption= "Mike Sandiford, msandifo@gmail.com\n repo: https://github.com/msandifo/001")+
   theme(plot.caption=element_text(colour="grey80", size=8,hjust=1) )}
 
 
+repo003 <- function(gas.use){
+  names(gas.use) <- stringr::str_to_lower(names(gas.use))
+  gas.use$date = lubridate::ymd(paste0(gas.use$year,"-",gas.use$month,"-15"))
+  gas.use$sum = rowSums(gas.use[, 3:5])
+  gas.use$efficiencyLower =(gas.use$gas_ccgt*.45 +gas.use$gas_ocgt*.3 +gas.use$gas_steam*.3 )/gas.use$sum
+  gas.use$efficiencyUpper =(gas.use$gas_ccgt*.5 +gas.use$gas_ocgt*.35 +gas.use$gas_steam*.35 )/gas.use$sum
+  #30-35% for steam (i.e. Torrens & Northern), 45%-50% for CCGT, and 30-35% for OCGT. 
+  
+  
+  ggplot(gas, aes(date, mw/1000 ))+geom_area(aes( fill=gas.type), alpha=.85,col="white", size=.2,position = "fill")+
+    geom_vline(xintercept = lubridate::ymd(c("2012-07-01", "2014-07-17")),
+               col="red4", size=.2, linetype=2) +
+    geom_vline(xintercept = lubridate::ymd(c("2017-04-01")), col="darkgreen", size=.2, linetype=2) +
+    geom_text(data = data.frame(),aes(x=lubridate::ymd("2012-07-15"), y=.900 ,
+                                      label="start\nC-Tax"), hjust=-0.,col="Red4", size=3)+
+    geom_text(data = data.frame(),aes(x=lubridate::ymd("2014-07-28"), y=.900 , 
+                                      label="end\nC-Tax"), hjust=-0.,col="Red4", size=3)+
+    geom_text(data = data.frame(),aes(x=lubridate::ymd("2017-04-19"), y=.900,
+                                      label="Hazelwood\nclosure"), hjust=-0.,col="darkgreen", size=3)+
+    theme(legend.position = "bottom")+
+    geom_line(data=gas.use, aes(y=efficiencyLower), size=.2)+
+    geom_line(data=gas.use, aes(y=efficiencyUpper), size=.2)+
+    coord_cartesian(ylim=c(0,.6))+
+    scale_y_continuous(labels = scales::percent, breaks = seq(0,1,by=0.1))+
+    labs(subtitle="NEM gas generation, thermal efficiency", x=NULL, 
+         y=NULL, caption= "Mike Sandiford, msandifo@gmail.com\n repo: https://github.com/msandifo/001")
+  
+  
+}
 #--------
 #drake plan
 #------
@@ -343,7 +371,9 @@ p1 +geom_line(data=NEM.month %>% subset(date< max( gas$date)+months(1)), aes(y=R
                       RRP = sum(RRP*TOTALDEMAND)/sum(TOTALDEMAND), 
                       TOTALDEMAND=5*sum(TOTALDEMAND)/length(TOTALDEMAND)),
    repo001.plot= repo001(lng, NEM.month,NEM.year),
-   repo002.plot= repo002(gas.use, NEM.month )
+   repo002.plot= repo002(gas.use, NEM.month ),
+   repo003.plot= repo003(gas.use  )
+   
    
  )
 
