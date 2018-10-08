@@ -15,7 +15,7 @@ download_aemo_aggregated(year=2010:2018, months=1:12, local.path=local.path)
 download_aemo_current( local.path=local.path )
 
 
-make
+make( twitter001)
 
 setwd("./figs")
 ggsave("ms001.png",  readd(repo001.plot) ,width=8, height=5) 
